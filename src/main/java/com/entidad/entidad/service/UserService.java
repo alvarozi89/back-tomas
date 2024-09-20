@@ -20,11 +20,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public List<User> getAllUsers() {
-        List<User> user = userRepository.findAll();
-        if (user.isEmpty()) {
-            throw new RuntimeException("No se encontraron usuarios");
-        }
-        return user;
+        return userRepository.findAll();
     }
 
     public Optional<User> getUserById(Long id) {
