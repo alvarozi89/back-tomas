@@ -58,7 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://front-tomas.netlify.app/")); // Reemplaza
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "https://front-tomas.netlify.app"));
         // con
         // tu
         // dominio
