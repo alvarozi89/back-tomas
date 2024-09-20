@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "back-tomas-production.up.railway.app")
+@CrossOrigin(origins = "http://localhost:4200")
 @Validated
 public class OrderController {
 
