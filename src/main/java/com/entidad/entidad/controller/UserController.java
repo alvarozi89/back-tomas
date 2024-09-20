@@ -24,7 +24,7 @@ import com.entidad.entidad.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "https://front-tomas.netlify.app")
 public class UserController {
 
     @Autowired

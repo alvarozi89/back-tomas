@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "https://front-tomas.netlify.app")
 public class AuthController {
 
     @Autowired
