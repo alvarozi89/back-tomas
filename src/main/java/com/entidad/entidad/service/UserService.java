@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import com.entidad.entidad.dto.UserDTO;
+import com.entidad.entidad.model.Role;
 import com.entidad.entidad.model.User;
 import com.entidad.entidad.repository.UserRepository;
 
@@ -30,25 +33,32 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public User saveUser(User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("El user no puede ser nulo");
-        }
-        if (!StringUtils.hasText(user.getNombre())) {
-            throw new IllegalArgumentException("El nombre del user no puede estar vacío");
-        }
+    public UserDTO saveUser(UserDTO userDTO) {
 
-        // Verifica si el nombre de usuario ya existe
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+        Optional<User> existingUser = userRepository.findByUsername(userDTO.getUsername());
         if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("El nombre de usuario ya está en uso");
+            throw new RuntimeException("El usuario con el nombre de usuario " + userDTO.getUsername() + " ya existe.");
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User user = new User();
+        user.setNombre(userDTO.getNombre());
+        user.setUsername(userDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        Role role = new Role();
+        role.setId(userDTO.getRole());
+        user.setRole(role);
+
+        User nuevoUser = userRepository.save(user);
+        UserDTO responseDTO = new UserDTO();
+        responseDTO.setId(nuevoUser.getId());
+        responseDTO.setNombre(nuevoUser.getNombre());
+        responseDTO.setUsername(nuevoUser.getUsername());
+        responseDTO.setRole(nuevoUser.getRole().getId());
+        responseDTO.setPassword(nuevoUser.getPassword());
+        return responseDTO;
     }
 
-    public User updateUser(Long id, User userActualizado) {
+    public UserDTO updateUser(Long id, UserDTO userActualizado) {
         return userRepository.findById(id)
                 .map(existingUser -> {
                     // Actualizar solo los campos que se proporcionan
@@ -59,7 +69,12 @@ public class UserService {
                         existingUser.setUsername(userActualizado.getUsername());
                     }
                     // Añadir más campos según sea necesario
-                    return userRepository.save(existingUser);
+                    User updatedUser = userRepository.save(existingUser);
+                    UserDTO responseDTO = new UserDTO();
+                    responseDTO.setNombre(updatedUser.getNombre());
+                    responseDTO.setUsername(updatedUser.getUsername());
+                    // Añadir más campos según sea necesario
+                    return responseDTO;
                 })
                 .orElseThrow(() -> new RuntimeException("Usuario not found with id " + id));
     }

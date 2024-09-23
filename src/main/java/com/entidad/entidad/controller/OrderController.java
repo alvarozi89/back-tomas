@@ -1,5 +1,7 @@
 package com.entidad.entidad.controller;
 
+import com.entidad.entidad.dto.OrdersDTO;
+import com.entidad.entidad.dto.UserDTO;
 import com.entidad.entidad.model.Orders;
 import com.entidad.entidad.model.User;
 import com.entidad.entidad.service.OrderService;
@@ -33,9 +35,9 @@ public class OrderController {
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Orders> createOrder(@RequestBody Orders order) {
-        Orders savedOrder = orderService.saveOrder(order);
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<OrdersDTO> createOrder(@RequestBody OrdersDTO order) {
+        OrdersDTO savedOrder = orderService.saveOrder(order);
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
 
@@ -52,7 +54,7 @@ public class OrderController {
     }
 
     @GetMapping("/top-customers")
-    public List<User> getTop5FrequentCustomers() {
+    public List<UserDTO> getTop5FrequentCustomers() {
         return orderService.getTop5FrequentCustomers();
     }
 }

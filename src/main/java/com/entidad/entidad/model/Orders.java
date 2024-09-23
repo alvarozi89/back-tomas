@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,12 +30,14 @@ public class Orders {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore
+    // @JsonIgnore
+    @JsonManagedReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    @JsonIgnore
+    // @JsonIgnore
+    @JsonManagedReference
     private Product product;
 
     private Integer quantity;

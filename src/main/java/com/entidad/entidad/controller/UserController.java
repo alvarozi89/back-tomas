@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.entidad.entidad.dto.UserDTO;
 import com.entidad.entidad.model.Product;
 import com.entidad.entidad.model.User;
 import com.entidad.entidad.service.UserService;
@@ -47,13 +48,13 @@ public class UserController {
     }
 
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> createuser(@RequestBody User user) {
-        User nuevoUser = userService.saveUser(user);
-        return ResponseEntity.ok(nuevoUser);
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+        UserDTO responseDTO = userService.saveUser(userDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 
-    @PutMapping("/user/update/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User userActualizado) {
+    @PutMapping(value = "/user/update/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public UserDTO updateUser(@PathVariable Long id, @RequestBody UserDTO userActualizado) {
         return userService.updateUser(id, userActualizado);
     }
 

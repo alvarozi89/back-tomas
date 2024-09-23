@@ -3,13 +3,20 @@ package com.entidad.entidad.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.entidad.entidad.dto.OrderDTO;
+import com.entidad.entidad.dto.OrdersDTO;
+import com.entidad.entidad.dto.UserDTO;
 import com.entidad.entidad.model.Orders;
+import com.entidad.entidad.model.Product;
 import com.entidad.entidad.model.User;
 import com.entidad.entidad.repository.OrderRepository;
+import com.entidad.entidad.repository.ProductRepository;
 import com.entidad.entidad.repository.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,16 +30,39 @@ public class OrderService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Transactional
     public List<Orders> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    public Orders saveOrder(Orders order) {
-        if (order == null) {
+    public OrdersDTO saveOrder(OrdersDTO orderDTO) {
+        if (orderDTO == null) {
             throw new IllegalArgumentException("Order cannot be null");
         }
+        Orders order = new Orders();
+        order.setQuantity(orderDTO.getQuantity());
+        order.setTotalPrice(orderDTO.getTotalPrice());
 
-        return orderRepository.save(order);
+        User user = userRepository.findById(orderDTO.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + orderDTO.getUserId()));
+        order.setUser(user);
+
+        Product product = productRepository.findById(orderDTO.getProductId())
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Product not found with ID: " + orderDTO.getProductId()));
+        order.setProduct(product);
+
+        Orders savedOrder = orderRepository.save(order);
+
+        return new OrdersDTO(
+                savedOrder.getId(),
+                savedOrder.getUser().getId(),
+                savedOrder.getProduct().getId(),
+                savedOrder.getQuantity(),
+                savedOrder.getTotalPrice());
     }
 
     public Orders getOrderById(Long id) {
@@ -55,15 +85,39 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    public List<User> getTop5FrequentCustomers() {
+    public List<UserDTO> getTop5FrequentCustomers() {
         Pageable pageable = PageRequest.of(0, 5);
         List<Object[]> results = orderRepository.findTopFrequentCustomers(pageable);
-
-        List<Long> userIds = results.stream()
-                .map(result -> (Long) result[0])
+        return results.stream()
+                .map(result -> {
+                    Long userId = (Long) result[0];
+                    if (userId != null) {
+                        User user = userRepository.findById(userId).orElse(null);
+                        if (user != null) {
+                            // Mapear User a UserDTO
+                            UserDTO userDTO = new UserDTO();
+                            userDTO.setId(user.getId());
+                            userDTO.setNombre(user.getNombre());
+                            userDTO.setUsername(user.getUsername());
+                            userDTO.setRole(user.getRole().getId());
+                            userDTO.setOrders(
+                                    user.getOrders().stream().map(this::mapToOrderDTO).collect(Collectors.toList()));
+                            return userDTO;
+                        }
+                    }
+                    return null;
+                })
+                .filter(userDTO -> userDTO != null) // Filtrar usuarios nulos
                 .collect(Collectors.toList());
+    }
 
-        return userRepository.findAllById(userIds);
+    private OrderDTO mapToOrderDTO(Orders order) {
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setId(order.getId());
+        orderDTO.setProductName(order.getProduct().getName());
+        orderDTO.setQuantity(order.getQuantity());
+        orderDTO.setTotalPrice(order.getTotalPrice());
+        return orderDTO;
     }
 
 }
